@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"jsx": "react",
+		"target": "esnext",
+		"moduleResolution": "node",
+		"module": "None",
+		"strict": true,
+		"sourceMap": true,
+		"baseUrl": "./",
+		"experimentalDecorators": true
+	},
+	"exclude": ["node_modules"]
+}
