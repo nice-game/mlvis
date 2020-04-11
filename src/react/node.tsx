@@ -2,6 +2,9 @@ import * as React from "react";
 import { BehaviorSubject, fromEvent, of, Subject } from "rxjs";
 import { switchMap } from "rxjs/operators";
 import styled from "styled-components";
+import { useObservable } from "rxjs-hooks";
+import { GraphNode } from "src/state/diagram";
+import { Vec2 } from "src/util/vec";
 
 const NodeWrap = styled.div`
 	position: absolute;
@@ -12,31 +15,24 @@ const NodeWrap = styled.div`
 `;
 
 interface NodeProps extends React.HTMLAttributes<HTMLDivElement> {
-	x: number;
-	y: number;
-	xChange?: (x: number) => void;
-	yChange?: (y: number) => void;
+	node: GraphNode;
 }
-export const Node = React.forwardRef<HTMLDivElement, NodeProps>((_props, ref) => {
-	const { x, y, xChange, yChange, ...props } = _props;
+export const NodeComp = React.forwardRef<HTMLDivElement, NodeProps>((_props, ref) => {
+	const { node, ...props } = _props;
 
-	const input = React.useRef(new Subject()).current;
+	const pos = useObservable(() => node.pos$);
+
 	const draggingBS = React.useRef(new BehaviorSubject(false)).current;
 
 	React.useEffect(() => {
 		const sub = draggingBS
 			.pipe(switchMap((dragging) => (dragging ? fromEvent<MouseEvent>(window, "mousemove") : of<MouseEvent>())))
-			.subscribe((ev) => {
-				xChange && xChange(x + ev.movementX);
-				yChange && yChange(y + ev.movementY);
-			});
+			.subscribe((ev) => node.setPos(pos!.add(new Vec2(ev.movementX, ev.movementY))));
 
 		return () => sub.unsubscribe();
 	});
 
-	React.useEffect(() => input.next({ x, y }), [x, y]);
-
-	const style = { ...props.style, top: y, left: x };
+	const style = { ...props.style, top: pos?.y, left: pos?.x };
 
 	return (
 		<NodeWrap

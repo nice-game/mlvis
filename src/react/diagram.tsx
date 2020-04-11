@@ -1,24 +1,42 @@
 import * as React from "react";
-import { Node } from "./node";
-import { Edge } from "./edge";
+import { useObservable } from "rxjs-hooks";
+import { addNode, nodes$, GraphNode } from "src/state/diagram";
+import { iter } from "src/util/iter";
+import { Vec2 } from "src/util/vec";
+import { NodeComp } from "./node";
+import { scan } from "rxjs/operators";
+import { tuple } from "src/util/tuple";
 
 export const Diagram: React.FC = () => {
-	const [node1, setNode1] = React.useState<HTMLDivElement | null>(null);
-	const [x1, setX1] = React.useState<number>(100);
-	const [y1, setY1] = React.useState<number>(100);
-	const [node2, setNode2] = React.useState<HTMLDivElement | null>(null);
-	const [x2, setX2] = React.useState<number>(130);
-	const [y2, setY2] = React.useState<number>(200);
+	const nodes: Map<GraphNode, HTMLDivElement | null> =
+		useObservable(() =>
+			nodes$.pipe(
+				scan(
+					(acc, val) =>
+						iter(val)
+							.map((k) => tuple(k, acc.get(k) || null))
+							.toMap(),
+					new Map(),
+				),
+			),
+		) || new Map();
+
+	console.log(nodes);
 
 	return (
 		<div style={{ position: "relative" }}>
-			<Node ref={(x) => setNode1(x)} x={x1} xChange={setX1} y={y1} yChange={setY1}>
-				node 1
-			</Node>
-			<Node ref={(x) => setNode2(x)} x={x2} xChange={setX2} y={y2} yChange={setY2}>
-				node 2
-			</Node>
-			<Edge from={node1} to={node2} />
+			<a href="javascript:void(0)" role="button" onClick={() => addNode(new GraphNode(new Vec2(100, 100)))}>
+				+ Add Node
+			</a>
+			{iter(nodes.keys())
+				.enumerate()
+				.map(([i, node]) => (
+					<NodeComp key={i} ref={(el) => nodes.set(node, el)} node={node}>
+						node {i}
+					</NodeComp>
+				))
+				.toArray()}
+			{/* <Edge from={node1} to={node2} /> */}
 		</div>
 	);
 };

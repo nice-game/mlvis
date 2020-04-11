@@ -1,4 +1,10 @@
+import { Frozen, Immutable } from "./decorators";
+
+@Frozen
+@Immutable
 export class Vec2 {
+	static ZERO = new Vec2(0, 0);
+
 	static clamp(n: Vec2, min: Vec2, max: Vec2): Vec2 {
 		const x = Math.max(Math.min(n.x, max.x), min.x);
 		const y = Math.max(Math.min(n.y, max.y), min.y);
