@@ -13,7 +13,7 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
-		"electron": "^8.2.1",
+		"electron": "^11.5.0",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
 		"rxjs": "^6.5.5",
